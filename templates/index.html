@@ -5,30 +5,105 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Direct Download Link Generator</title>
     <style>
-        #download-section {
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f9;
+            color: #333;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+
+        h1 {
+            color: #4a90e2;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        form {
+            background: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 600px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+        }
+
+        input[type="text"] {
+            width: calc(100% - 22px);
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            margin-bottom: 12px;
+        }
+
+        .button-container {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        button {
+            background-color: #4a90e2;
+            border: none;
+            color: white;
+            padding: 10px 20px;
+            text-align: center;
+            text-decoration: none;
+            font-size: 16px;
+            cursor: pointer;
+            border-radius: 4px;
+        }
+
+        button:hover {
+            background-color: #357abd;
+        }
+
+        #download-link {
+            margin-left: 10px;
+            color: #4a90e2;
+            text-decoration: none;
+            font-size: 16px;
             display: none;
-            margin-top: 20px;
+        }
+
+        #download-link.visible {
+            display: inline;
         }
     </style>
     <script>
-        function showDownloadLink(link) {
-            document.getElementById('download-link').textContent = link;
-            document.getElementById('download-button').href = link;
-            document.getElementById('download-section').style.display = 'block';
-        }
-
         function handleResponse(responseText) {
-            const link = responseText.match(/Direct Download Link: <a href="([^"]+)">/)[1];
-            showDownloadLink(link);
+            const linkMatch = responseText.match(/Direct Download Link: <a href="([^"]+)">/);
+            if (linkMatch) {
+                const link = linkMatch[1];
+                const downloadLink = document.getElementById('download-link');
+                downloadLink.href = link;
+                downloadLink.textContent = 'Download Here';
+                downloadLink.classList.add('visible');
+            } else {
+                console.error('Link not found in response');
+            }
         }
 
         function submitForm(event) {
             event.preventDefault();
-            
-            const formData = new FormData(event.target);
+            const mediafireUrl = document.getElementById('mediafire_url').value;
+
             fetch('/generate', {
                 method: 'POST',
-                body: formData
+                body: new URLSearchParams({ mediafire_url: mediafireUrl })
             })
             .then(response => response.text())
             .then(handleResponse)
@@ -37,16 +112,16 @@
     </script>
 </head>
 <body>
-    <h1>Direct Download Link Generator</h1>
-    <form id="generate-form" onsubmit="submitForm(event)">
-        <label for="mediafire_url">MediaFire Link:</label>
-        <input type="text" id="mediafire_url" name="mediafire_url" required>
-        <button type="submit">Generate</button>
-    </form>
-
-    <div id="download-section">
-        <a id="download-button" href="#" target="_blank">Download</a></p>
-        <p id="download-link"></p>
+    <div>
+        <h1>Direct Download Link Generator</h1>
+        <form id="generate-form" onsubmit="submitForm(event)">
+            <label for="mediafire_url">MediaFire Link:</label>
+            <input type="text" id="mediafire_url" name="mediafire_url" required>
+            <div class="button-container">
+                <button type="submit">Generate Download</button>
+                <a id="download-link" href="#" target="_blank"></a>
+            </div>
+        </form>
     </div>
 </body>
 </html>
