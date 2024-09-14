@@ -5,79 +5,129 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Direct Download Link Generator</title>
     <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap');
+
+        :root {
+            --primary-color: #3498db;
+            --secondary-color: #2980b9;
+            --background-color: #f5f7fa;
+            --text-color: #34495e;
+            --shadow-color: rgba(0, 0, 0, 0.1);
+        }
+
         body {
-            font-family: Arial, sans-serif;
-            background-color: #f4f4f9;
-            color: #333;
+            font-family: 'Poppins', sans-serif;
+            background-color: var(--background-color);
+            color: var(--text-color);
             margin: 0;
             padding: 0;
             display: flex;
             justify-content: center;
             align-items: center;
-            height: 100vh;
+            min-height: 100vh;
+        }
+
+        .container {
+            background: white;
+            padding: 2rem;
+            border-radius: 12px;
+            box-shadow: 0 8px 30px var(--shadow-color);
+            width: 100%;
+            max-width: 500px;
+            transition: transform 0.3s ease;
+        }
+
+        .container:hover {
+            transform: translateY(-5px);
         }
 
         h1 {
-            color: #4a90e2;
+            color: var(--primary-color);
             text-align: center;
-            margin-bottom: 20px;
+            margin-bottom: 1.5rem;
+            font-weight: 600;
         }
 
         form {
-            background: #fff;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-            width: 100%;
-            max-width: 600px;
             display: flex;
             flex-direction: column;
-            align-items: center;
         }
 
         label {
-            display: block;
-            margin-bottom: 8px;
-            font-weight: bold;
+            margin-bottom: 0.5rem;
+            font-weight: 400;
         }
 
         input[type="text"] {
-            width: calc(100% - 22px);
-            padding: 10px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            margin-bottom: 12px;
+            padding: 0.75rem;
+            border: 2px solid #e0e0e0;
+            border-radius: 6px;
+            font-size: 1rem;
+            transition: border-color 0.3s ease;
+        }
+
+        input[type="text"]:focus {
+            outline: none;
+            border-color: var(--primary-color);
         }
 
         .button-container {
             display: flex;
-            gap: 10px;
-            align-items: center;
+            gap: 1rem;
+            margin-top: 1.5rem;
         }
 
         button {
-            background-color: #4a90e2;
-            border: none;
+            flex: 1;
+            background-color: var(--primary-color);
             color: white;
-            padding: 10px 20px;
-            text-align: center;
-            text-decoration: none;
-            font-size: 16px;
+            border: none;
+            padding: 0.75rem;
+            font-size: 1rem;
             cursor: pointer;
-            border-radius: 4px;
+            border-radius: 6px;
+            transition: background-color 0.3s ease, transform 0.1s ease;
         }
 
         button:hover {
-            background-color: #357abd;
+            background-color: var(--secondary-color);
+        }
+
+        button:active {
+            transform: scale(0.98);
         }
 
         #download-link {
-            color: #4a90e2;
-            text-decoration: none;
-            font-size: 16px;
-            display: none; 
+            margin-top: 1rem;
+            text-align: center;
+            font-size: 0.9rem;
+            color: var(--primary-color);
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .fade-in {
+            animation: fadeIn 0.5s ease forwards;
         }
     </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Direct Download Link Generator</h1>
+        <form id="generate-form">
+            <label for="mediafire_url">MediaFire Link:</label>
+            <input type="text" id="mediafire_url" name="mediafire_url" required placeholder="Enter MediaFire URL">
+            <div class="button-container">
+                <button type="button" onclick="showLink()">Show Link</button>
+                <button type="button" onclick="redirectToDownload()">Download</button>
+            </div>
+        </form>
+        <div id="download-link"></div>
+    </div>
+
     <script>
         let generatedLink = '';
 
@@ -85,9 +135,11 @@
             const linkMatch = responseText.match(/Direct Download Link: <a href="([^"]+)">/);
             if (linkMatch) {
                 generatedLink = linkMatch[1];
+                return true;
             } else {
                 console.error('Link not found in response');
-                alert('Error generating download link.');
+                showMessage('Error generating download link.', 'error');
+                return false;
             }
         }
 
@@ -103,33 +155,27 @@
         }
 
         function showLink() {
-            generateLink().then(() => {
-                if (generatedLink) {
-                    alert(generatedLink);
+            generateLink().then((success) => {
+                if (success) {
+                    showMessage(`<a href="${generatedLink}" target="_blank">${generatedLink}</a>`, 'success');
                 }
             });
         }
 
         function redirectToDownload() {
-            generateLink().then(() => {
-                if (generatedLink) {
+            generateLink().then((success) => {
+                if (success) {
                     window.location.href = generatedLink;
                 }
             });
         }
+
+        function showMessage(message, type) {
+            const downloadLink = document.getElementById('download-link');
+            downloadLink.innerHTML = message;
+            downloadLink.className = `fade-in ${type}`;
+            downloadLink.style.display = 'block';
+        }
     </script>
-</head>
-<body>
-    <div>
-        <h1>Direct Download Link Generator</h1>
-        <form id="generate-form">
-            <label for="mediafire_url">MediaFire Link:</label>
-            <input type="text" id="mediafire_url" name="mediafire_url" required>
-            <div class="button-container">
-                <button type="button" onclick="showLink()">Show Link</button>
-                <button type="button" onclick="redirectToDownload()">Download</button>
-            </div>
-        </form>
-    </div>
 </body>
 </html>
