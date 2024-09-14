@@ -72,54 +72,62 @@
         }
 
         #download-link {
-            margin-left: 10px;
             color: #4a90e2;
             text-decoration: none;
             font-size: 16px;
-            display: none;
-        }
-
-        #download-link.visible {
-            display: inline;
+            display: none; 
         }
     </style>
     <script>
+        let generatedLink = '';
+
         function handleResponse(responseText) {
             const linkMatch = responseText.match(/Direct Download Link: <a href="([^"]+)">/);
             if (linkMatch) {
-                const link = linkMatch[1];
-                const downloadLink = document.getElementById('download-link');
-                downloadLink.href = link;
-                downloadLink.textContent = 'Download Here';
-                downloadLink.classList.add('visible');
+                generatedLink = linkMatch[1];
             } else {
                 console.error('Link not found in response');
+                alert('Error generating download link.');
             }
         }
 
-        function submitForm(event) {
-            event.preventDefault();
+        function generateLink() {
             const mediafireUrl = document.getElementById('mediafire_url').value;
 
-            fetch('/generate', {
+            return fetch('/generate', {
                 method: 'POST',
                 body: new URLSearchParams({ mediafire_url: mediafireUrl })
             })
             .then(response => response.text())
-            .then(handleResponse)
-            .catch(error => console.error('Error:', error));
+            .then(handleResponse);
+        }
+
+        function showLink() {
+            generateLink().then(() => {
+                if (generatedLink) {
+                    alert(generatedLink);
+                }
+            });
+        }
+
+        function redirectToDownload() {
+            generateLink().then(() => {
+                if (generatedLink) {
+                    window.location.href = generatedLink;
+                }
+            });
         }
     </script>
 </head>
 <body>
     <div>
         <h1>Direct Download Link Generator</h1>
-        <form id="generate-form" onsubmit="submitForm(event)">
+        <form id="generate-form">
             <label for="mediafire_url">MediaFire Link:</label>
             <input type="text" id="mediafire_url" name="mediafire_url" required>
             <div class="button-container">
-                <button type="submit">Generate Download</button>
-                <a id="download-link" href="#" target="_blank"></a>
+                <button type="button" onclick="showLink()">Show Link</button>
+                <button type="button" onclick="redirectToDownload()">Download</button>
             </div>
         </form>
     </div>
