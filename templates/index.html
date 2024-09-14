@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Direct Download Link Generator</title>
+    <style>
+        #download-section {
+            display: none;
+            margin-top: 20px;
+        }
+    </style>
+    <script>
+        function showDownloadLink(link) {
+            document.getElementById('download-link').textContent = link;
+            document.getElementById('download-button').href = link;
+            document.getElementById('download-section').style.display = 'block';
+        }
+
+        function handleResponse(responseText) {
+            const link = responseText.match(/Direct Download Link: <a href="([^"]+)">/)[1];
+            showDownloadLink(link);
+        }
+
+        function submitForm(event) {
+            event.preventDefault();
+            
+            const formData = new FormData(event.target);
+            fetch('/generate', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.text())
+            .then(handleResponse)
+            .catch(error => console.error('Error:', error));
+        }
+    </script>
+</head>
+<body>
+    <h1>Direct Download Link Generator</h1>
+    <form id="generate-form" onsubmit="submitForm(event)">
+        <label for="mediafire_url">MediaFire Link:</label>
+        <input type="text" id="mediafire_url" name="mediafire_url" required>
+        <button type="submit">Generate</button>
+    </form>
+
+    <div id="download-section">
+        <a id="download-button" href="#" target="_blank">Download</a></p>
+        <p id="download-link"></p>
+    </div>
+</body>
+</html>
